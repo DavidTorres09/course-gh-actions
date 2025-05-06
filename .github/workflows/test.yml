@@ -8,6 +8,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: DevOps
 
     steps:
       - name: Clone the repository
@@ -20,10 +22,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: build the docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/tu-imagen:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/test-image:latest .
 
       - name: Upload the image to docker Hub
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/tu-imagen:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/test-image:latest
 
       - name: config ssh
         uses: webfactory/ssh-agent@v0.5.4
