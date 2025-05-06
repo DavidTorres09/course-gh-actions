@@ -1,33 +1,41 @@
-# This is a basic workflow to help you get started with Actions
+name: CI/CD Pipeline
 
-name: test
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  # push:
-  # schedule:
-  #  - cron: "0 * * * *" #Every day at midnight
-  workflow_dispatch: # manual
+  push:
+    branches:
+      - main
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  build-and-deploy:
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - name: Clone the repository
+        uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Login in Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: build the docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/tu-imagen:latest .
+
+      - name: Upload the image to docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/tu-imagen:latest
+
+      - name: config ssh
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy the droplet
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          ssh -o StrictHostKeyChecking=no [email protected]${{ secrets.DROPLET_IP }} << 'EOF'
+            docker pull ${{ secrets.DOCKER_USERNAME }}/test-image:latest
+            docker stop test-container || true
+            docker rm test-container || true
+            docker run -d --name test-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/tu-image:latest
+          EOF
+
