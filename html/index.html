@@ -1,10 +1,33 @@
-<!-- html/index.html -->
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <title>Test Docker CI/CD</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CI/CD in DigitalOcean</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>🎉 ¡CI/CD working in DigitalOcean!</h1>
+    <div class="floating-circle large"></div>
+    <div class="floating-circle small"></div>
+    <div class="glow-line"></div>
+    <h1 id="typewriter"></h1>
+
+    <script>
+      const text = 'CI/CD successfully deployed on DigitalOcean!';
+      let i = 0;
+      const speed = 50;
+      function type() {
+        if (i < text.length) {
+          document.getElementById('typewriter').innerHTML += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      window.onload = type;
+    </script>
   </body>
 </html>
