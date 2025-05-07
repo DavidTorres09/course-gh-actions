@@ -36,7 +36,7 @@ jobs:
 
       - name: Deploy the droplet
         run: |
-          ssh -o StrictHostKeyChecking=no [email protected]${{ secrets.DROPLET_IP }} << EOF
+          ssh -o StrictHostKeyChecking=no root${{ secrets.DROPLET_IP }} << EOF
             set -e
             IMAGE_TAG=${{ github.sha }}
             echo "📦 Pulling image..."
