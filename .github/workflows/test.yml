@@ -40,6 +40,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << EOF
             set -e
             IMAGE_TAG=${{ github.sha }}
+            echo "🔐 Logging in to Docker Hub..."
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             echo "📦 Pulling image..."
             docker pull ${{ secrets.DOCKER_USERNAME }}/test-image:\$IMAGE_TAG
             docker stop test-container || true
