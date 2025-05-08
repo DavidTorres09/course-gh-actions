@@ -61,9 +61,16 @@ jobs:
               -e MONGO_INITDB_ROOT_PASSWORD=lotto \
               mongo:6.0
 
-            docker stop test-container || true
-            docker rm test-container || true
-            echo "🚀 Starting container..."
-            docker run -d --name test-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/test-image:\$IMAGE_TAG
+
+            echo "🚀 Starting test container..."
+            docker run -d \
+              --name test-container \
+              --network=host \
+              -e MONGO_URI="mongodb://lotto:lotto@localhost:27018" \
+              ${{ secrets.DOCKER_USERNAME }}/test-image:$IMAGE_TAG
+
+            echo "📋 Showing logs of container:"
+            docker logs test-container
+
           EOF
 
