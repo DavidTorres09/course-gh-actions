@@ -40,10 +40,27 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << EOF
             set -e
             IMAGE_TAG=${{ github.sha }}
+
             echo "🔐 Logging in to Docker Hub..."
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
             echo "📦 Pulling image..."
             docker pull ${{ secrets.DOCKER_USERNAME }}/test-image:\$IMAGE_TAG
+
+            echo "🧹 Cleaning previous containers..."
+            docker stop test-container || true
+            docker rm test-container || true
+            docker stop test-mongo || true
+            docker rm test-mongo || true
+
+            echo "🐳 Starting MongoDB..."
+            docker run -d \
+              --name test-mongo \
+              -p 27018:27017 \
+              -e MONGO_INITDB_ROOT_USERNAME=lotto \
+              -e MONGO_INITDB_ROOT_PASSWORD=lotto \
+              mongo:6.0
+
             docker stop test-container || true
             docker rm test-container || true
             echo "🚀 Starting container..."
