@@ -49,7 +49,7 @@ jobs:
             docker volume rm mongo_data || true
 
             echo "🐳 Start MongoDB with init..."
-            docker compose -f mongo-tools/init/mongo-compose.yaml up -d
+            docker compose up -d
 
             echo "⏳ Wait for Mongo to be ready..."
             until mongosh "mongodb://lotto:lotto@localhost:27017/Lotto?authMechanism=SCRAM-SHA-1" --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
