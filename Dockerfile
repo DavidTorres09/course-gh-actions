@@ -15,6 +15,7 @@ WORKDIR /app
 COPY . .
 
 #RUN npm ci
+RUN chmod +x run_tests.sh
 RUN chmod +x ./mongo-tools/scripts/*.sh
 
 CMD ["bash", "./mongo-tools/scripts/run_tests.sh"]

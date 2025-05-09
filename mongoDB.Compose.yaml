@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: mongo-test-container
+    restart: always
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: lotto
+      MONGO_INITDB_ROOT_PASSWORD: lotto
+      MONGO_INITDB_DATABASE: Lotto
+    volumes:
+      - mongo-test-data:/data/db
+      - ./mongo-tools/init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: test-runner-container
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URI: mongodb://lotto:lotto@mongo:27017/Lotto?authSource=admin
+    command: ["bash", "./mongo-tools/scripts/run_tests.sh"]
+    networks:
+      - internal
+
+volumes:
+  mongo-test-data:
+
+networks:
+  internal:

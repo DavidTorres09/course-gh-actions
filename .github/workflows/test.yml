@@ -35,53 +35,31 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Copy docker-compose file to server
+        run: |
+          scp -o StrictHostKeyChecking=no mongoDB.Compose.yaml root@${{ secrets.DROPLET_IP }}:/root/test-suite/
+
+
       - name: Deploy the droplet
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << EOF
             set -e
-            IMAGE_TAG=${{ github.sha }}
 
             echo "🔐 Logging in to Docker Hub..."
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-            echo "📦 Pulling image..."
-            docker pull ${{ secrets.DOCKER_USERNAME }}/test-image:\$IMAGE_TAG
+            echo "📦 Pulling latest test image (if needed)..."
+            docker pull ${{ secrets.DOCKER_USERNAME }}/test-image:${{ github.sha }} || true
 
-            echo "🧹 Cleaning previous containers..."
-            docker stop test-container || true
-            docker rm test-container || true
-            docker stop test-mongo || true
-            docker rm test-mongo || true
+            echo "🧹 Cleaning up previous stack..."
+            docker compose -f /root/test-suite/mongoDB.Compose.yaml down -v || true
 
-            echo "💾 Removing volume..."
-            docker volume rm mongo_data || true
+            echo "🚀 Starting test stack (Mongo + Runner)..."
+            docker compose -f /root/test-suite/mongoDB.Compose.yaml up --build --abort-on-container-exit
 
-            echo "🐳 Starting MongoDB..."
-            docker run -d \
-            --name test-mongo \
-            -p 27018:27017 \
-            -v mongo_data:/data/db \
-            -v /root/test-suite/mongo-tools/init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro \
-            -e MONGO_INITDB_ROOT_USERNAME=lotto \
-            -e MONGO_INITDB_ROOT_PASSWORD=lotto \
-            mongo:6.0
-
-            echo "⏳ Waiting for MongoDB to be ready..."
-            until mongosh "mongodb://lotto:lotto@localhost:27017/admin?authMechanism=SCRAM-SHA-1" --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
-              echo "⏳ Mongo not ready yet. Retrying in 2s..."
-              sleep 2
-            done
-            echo "✅ Mongo is ready!"
-
-            echo "🚀 Starting test container..."
-            docker run -d \
-              --name test-container \
-              --network=host \
-              -e MONGO_URI="mongodb://lotto:lotto@localhost:27017" \
-              ${{ secrets.DOCKER_USERNAME }}/test-image:$IMAGE_TAG
-
-            echo "📋 Showing logs of container:"
-            docker logs test-container
+            echo "📋 Showing logs:"
+            docker compose -f /root/test-suite/mongoDB.Compose.yaml logs --no-color
 
           EOF
+
 
