@@ -71,7 +71,7 @@ jobs:
             docker run -d \
               --name test-container \
               --network=host \
-              -e MONGO_URI="mongodb://lotto:lotto@localhost:27018" \
+              -e MONGO_URI="mongodb://lotto:lotto@localhost:27017" \
               ${{ secrets.DOCKER_USERNAME }}/test-image:$IMAGE_TAG
 
             echo "📋 Showing logs of container:"
