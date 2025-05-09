@@ -11,10 +11,14 @@ RUN apt-get update && \
     mv mongosh-*/bin/mongosh /usr/local/bin/ && \
     rm -rf mongosh-*
 
+COPY package*.json ./
+
+RUN npm install
+RUN npm install && npx playwright install --with-deps
+
 WORKDIR /app
 COPY . .
 
-#RUN npm ci
 RUN chmod +x ./mongo-tools/scripts/*.sh
 
 CMD ["bash", "./mongo-tools/scripts/run_tests.sh"]
