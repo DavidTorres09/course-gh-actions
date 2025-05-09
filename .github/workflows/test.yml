@@ -39,3 +39,5 @@ jobs:
           ssh_host_public_key: ${{ secrets.SSH_HOST_PUBLIC_KEY }}
           docker_compose_prefix: myapp
           docker_compose_filename: docker-compose.yml
+          ssh_jump_host: ""
+          ssh_jump_public_key: ""
