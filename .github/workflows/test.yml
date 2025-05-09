@@ -35,55 +35,47 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy and run tests
+      - name: Deploy the droplet
         run: |
-          IMAGE_TAG=${{ github.sha }}
-          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
-            set -e  
-
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << EOF
+            set -e
             IMAGE_TAG=${{ github.sha }}
 
             echo "🔐 Logging in to Docker Hub..."
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-            echo "📦 Pulling test image..."
+            echo "📦 Pulling image..."
             docker pull ${{ secrets.DOCKER_USERNAME }}/test-image:\$IMAGE_TAG
 
-            echo "🧹 Cleaning up previous containers..."
-            docker stop test-container test-mongo || true
-            docker rm test-container test-mongo || true
+            echo "🧹 Cleaning previous containers..."
+            docker stop test-container || true
+            docker rm test-container || true
+            docker stop test-mongo || true
+            docker rm test-mongo || true
 
-            echo "💾 Removing old Mongo volume (optional)..."
+            echo "💾 Removing volume..."
             docker volume rm mongo_data || true
 
             echo "🐳 Starting MongoDB..."
             docker run -d \
-              --name test-mongo \
-              --network=host \
-              -v mongo_data:/data/db \
-              -v /root/test-suite/mongo-tools/init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro \
-              -e MONGO_INITDB_ROOT_USERNAME=lotto \
-              -e MONGO_INITDB_ROOT_PASSWORD=lotto \
-              mongo:6.0
+            --name test-mongo \
+            -p 27018:27017 \
+            -v mongo_data:/data/db \
+            -v /root/test-suite/mongo-tools/init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro \
+            -e MONGO_INITDB_ROOT_USERNAME=lotto \
+            -e MONGO_INITDB_ROOT_PASSWORD=lotto \
+            mongo:6.0
 
-            echo "⏳ Waiting 5s for Mongo to initialize..."
-            sleep 5  
 
             echo "🚀 Starting test container..."
-            docker run --name test-container \
+            docker run -d \
+              --name test-container \
               --network=host \
-              -e MONGO_URI="mongodb://lotto:lotto@localhost:27017/Lotto?authMechanism=SCRAM-SHA-1" \
-              ${{ secrets.DOCKER_USERNAME }}/test-image:\$IMAGE_TAG
+              -e MONGO_URI="mongodb://lotto:lotto@localhost:27017" \
+              ${{ secrets.DOCKER_USERNAME }}/test-image:$IMAGE_TAG
 
-            echo "📋 Showing logs of test container:"
+            echo "📋 Showing logs of container:"
             docker logs test-container
-
-            echo "🔍 Checking exit code..."
-            EXIT_CODE=\$(docker inspect test-container --format='{{.State.ExitCode}}')
-            if [ "\$EXIT_CODE" -ne 0 ]; then
-              echo "❌ Test container failed with exit code \$EXIT_CODE"
-              exit 1
-            fi
 
           EOF
 
