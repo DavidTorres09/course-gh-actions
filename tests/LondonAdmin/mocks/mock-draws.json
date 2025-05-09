@@ -1,0 +1,62 @@
+{
+  "currentDateTime": "2025-04-09T11:18:30.117161",
+  "finishedLotteries": [
+    {
+      "anyFakeTicketNumber": false,
+      "description": "PR Midday PATITOS  9:00 AM",
+      "domains": [
+        {
+          "url": "betanysports.eu",
+          "isEnabled": true
+        }
+      ],
+      "drawDate": "04/08/2025 09:00:00",
+      "gameType": "LotteryPick2",
+      "isEnabled": true,
+      "log": "admin sets winner numbers to '11' at 04/09/25 12:45:31 AM<br>",
+      "noAction": false,
+      "scheduledHour": "9:00 AM",
+      "state": "PR",
+      "url": "https://loteriasdepuertorico.pr.gov/loteria-electronica/",
+      "winnerNumbers": "11"
+    }
+  ],
+  "scheduledLotteries": [
+    {
+      "anyFakeTicketNumber": false,
+      "description": "PR Midday 9:00 AM",
+      "domains": [
+        {
+          "url": "betanysports.eu",
+          "isEnabled": true
+        }
+      ],
+      "drawDate": "04/08/2025 09:00:00",
+      "gameType": "LotteryPick3",
+      "isEnabled": true,
+      "log": "",
+      "noAction": false,
+      "scheduledHour": "9:00 AM",
+      "state": "PR",
+      "url": "https://loteriasdepuertorico.pr.gov/loteria-electronica/"
+    },
+    {
+      "anyFakeTicketNumber": false,
+      "description": "PR Midday 9:00 AM",
+      "domains": [
+        {
+          "url": "betanysports.eu",
+          "isEnabled": true
+        }
+      ],
+      "drawDate": "04/08/2025 09:00:00",
+      "gameType": "LotteryPick4",
+      "isEnabled": true,
+      "log": "",
+      "noAction": false,
+      "scheduledHour": "9:00 AM",
+      "state": "PR",
+      "url": "https://loteriasdepuertorico.pr.gov/loteria-electronica/"
+    }
+  ]
+}
