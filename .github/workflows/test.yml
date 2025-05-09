@@ -35,6 +35,36 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Generate docker-compose file with dynamic image tag
+        run: |
+          cat <<EOF > mongoDB.Compose.yaml
+        version: '3.8'
+
+        services:
+          mongo:
+            image: mongo:6.0
+            ports:
+              - "27018:27017"
+            environment:
+              MONGO_INITDB_ROOT_USERNAME: lotto
+              MONGO_INITDB_ROOT_PASSWORD: lotto
+              MONGO_INITDB_DATABASE: Lotto
+            volumes:
+              - mongo-test-data:/data/db
+              - ./mongo-tools/init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+
+          test-runner:
+            image: ${{ secrets.DOCKER_USERNAME }}/test-image:${{ github.sha }}
+            container_name: test-runner
+            environment:
+              MONGO_URI: mongodb://lotto:lotto@mongo:27017/Lotto?authSource=admin
+            depends_on:
+              - mongo
+
+        volumes:
+          mongo-test-data:
+        EOF
+
       - name: Copy docker-compose file to server
         run: |
           scp -o StrictHostKeyChecking=no mongoDB.Compose.yaml root@${{ secrets.DROPLET_IP }}:/root/test-suite/
@@ -55,11 +85,12 @@ jobs:
             docker compose -f /root/test-suite/mongoDB.Compose.yaml down -v || true
 
             echo "🚀 Starting test stack (Mongo + Runner)..."
-            docker compose -f /root/test-suite/mongoDB.Compose.yaml up --build --abort-on-container-exit
+            docker compose -f /root/test-suite/mongoDB.Compose.yaml up --abort-on-container-exit
 
             echo "📋 Showing logs:"
             docker compose -f /root/test-suite/mongoDB.Compose.yaml logs --no-color
 
           EOF
+
 
 
