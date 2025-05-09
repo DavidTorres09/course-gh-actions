@@ -49,22 +49,15 @@ jobs:
             docker volume rm mongo_data || true
 
             echo "🐳 Start MongoDB with init..."
-            docker run -d \
-              --name test-mongo \
-              -p 27018:27017 \
-              -v mongo_data:/data/db \
-              -v /root/test-suite/mongo-tools/init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro \
-              -e MONGO_INITDB_ROOT_USERNAME=lotto \
-              -e MONGO_INITDB_ROOT_PASSWORD=lotto \
-              mongo:6.0
+            docker compose -f mongo-tools/init/mongo-compose.yaml up -d
 
             echo "⏳ Wait for Mongo to be ready..."
-            until mongosh "mongodb://lotto:lotto@localhost:27017/admin?authMechanism=SCRAM-SHA-1" --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
+            until mongosh "mongodb://lotto:lotto@localhost:27017/Lotto?authMechanism=SCRAM-SHA-1" --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
               echo "⏳ Mongo not ready yet..."
               sleep 2
             done
-
             echo "✅ Running test container..."
+
             docker run --rm \
               --network=host \
               -e MONGO_URI="mongodb://lotto:lotto@localhost:27017/Lotto?authSource=admin" \
