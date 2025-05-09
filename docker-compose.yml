@@ -26,7 +26,8 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     environment:
       MONGO_URL: mongodb://lotto:lotto@mongo:27017/Lotto?authMechanism=SCRAM-SHA-1
     volumes:
