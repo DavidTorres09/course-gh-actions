@@ -3,7 +3,7 @@
 chmod +x ./mongo-tools/scripts/restore.sh
 chmod +x ./mongo-tools/scripts/update_dates.sh
 
-MONGO_URI="mongodb://lotto:lotto@localhost:27017/Lotto?authMechanism=SCRAM-SHA-1"
+MONGO_URI="mongodb://lotto:lotto@mongo:27017/Lotto?authMechanism=SCRAM-SHA-1"
 DB_NAME="Lotto"
 ARCHIVE_NAME="./mongo-tools/backups/backup.archive.gz"
 
