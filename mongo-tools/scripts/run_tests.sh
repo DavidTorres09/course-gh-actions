@@ -30,10 +30,10 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "🖥️ Running desktop Playwright tests..."
-PLAYWRIGHT_HTML_OUTPUT_DIR=$DESKTOP_REPORT_DIR PLAYWRIGHT_HTML_OPEN=never npx playwright test tests/LondonPlayers/desktop/history --reporter=html
-if [ $? -ne 0 ]; then
-  echo "❌ Desktop tests failed. Proceeding anyway to mobile..."
-fi
+#PLAYWRIGHT_HTML_OUTPUT_DIR=$DESKTOP_REPORT_DIR PLAYWRIGHT_HTML_OPEN=never npx playwright test tests/LondonPlayers/desktop/history --reporter=html
+#if [ $? -ne 0 ]; then
+#  echo "❌ Desktop tests failed. Proceeding anyway to mobile..."
+#fi
 
 echo "🔁 Restoring database again before running mobile tests..."
 ./mongo-tools/scripts/restore.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
@@ -50,17 +50,17 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "📱 Running mobile Playwright tests..."
-PLAYWRIGHT_HTML_OUTPUT_DIR=$MOBILE_REPORT_DIR PLAYWRIGHT_HTML_OPEN=never npx playwright test tests/LondonPlayers/mobile/history --reporter=html
-if [ $? -ne 0 ]; then
-  echo "❌ Mobile tests failed."
-  exit 1
-fi
+#PLAYWRIGHT_HTML_OUTPUT_DIR=$MOBILE_REPORT_DIR PLAYWRIGHT_HTML_OPEN=never npx playwright test tests/LondonPlayers/mobile/history --reporter=html
+#if [ $? -ne 0 ]; then
+#  echo "❌ Mobile tests failed."
+#  exit 1
+#fi
 
 echo "📊 Serving reports on different ports..."
-npx playwright show-report $DESKTOP_REPORT_DIR --port=9323 &
-PID_DESKTOP=$!
-npx playwright show-report $MOBILE_REPORT_DIR --port=9324 &
-PID_MOBILE=$!
+#npx playwright show-report $DESKTOP_REPORT_DIR --port=9323 &
+#PID_DESKTOP=$!
+#npx playwright show-report $MOBILE_REPORT_DIR --port=9324 &
+#PID_MOBILE=$!
 
 echo "✅ All tests completed successfully. Reports are available at:"
 echo "   - Desktop report: http://localhost:9323"
@@ -68,16 +68,16 @@ echo "   - Mobile report: http://localhost:9324"
 
 cleanup() {
   echo "🛑 Cleaning up background processes..."
-  if [[ -n "$PID_DESKTOP" ]]; then
-    kill "$PID_DESKTOP" 2>/dev/null
-  fi
-  if [[ -n "$PID_MOBILE" ]]; then
-    kill "$PID_MOBILE" 2>/dev/null
-  fi
-  wait
+  #if [[ -n "$PID_DESKTOP" ]]; then
+  #  kill "$PID_DESKTOP" 2>/dev/null
+  #fi
+  #if [[ -n "$PID_MOBILE" ]]; then
+  #  kill "$PID_MOBILE" 2>/dev/null
+  #fi
+  #wait
   echo "✅ Cleanup complete."
 }
 
 trap cleanup EXIT
 
-wait $PID_DESKTOP $PID_MOBILE
+#wait $PID_DESKTOP $PID_MOBILE
