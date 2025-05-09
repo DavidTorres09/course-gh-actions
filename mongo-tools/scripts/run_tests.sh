@@ -75,16 +75,16 @@ echo "   - Mobile report: http://localhost:9324"
 
 cleanup() {
   echo "🛑 Cleaning up background processes..."
-  if [[ -n "$PID_DESKTOP" ]]; then
-    kill "$PID_DESKTOP" 2>/dev/null
-  fi
-  if [[ -n "$PID_MOBILE" ]]; then
-    kill "$PID_MOBILE" 2>/dev/null
-  fi
-  wait
+  #if [[ -n "$PID_DESKTOP" ]]; then
+  #  kill "$PID_DESKTOP" 2>/dev/null
+  #fi
+  #if [[ -n "$PID_MOBILE" ]]; then
+  #  kill "$PID_MOBILE" 2>/dev/null
+  #fi
+  #wait
   echo "✅ Cleanup complete."
 }
 
 trap cleanup EXIT
 
-wait $PID_DESKTOP $PID_MOBILE
+#wait $PID_DESKTOP $PID_MOBILE
