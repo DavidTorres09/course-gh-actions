@@ -18,52 +18,24 @@ jobs:
       - name: Clone the repository
         uses: actions/checkout@v3
 
-      - name: Login in Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: build the docker image
+      - name: Build the Docker image
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/test-image:${{ env.IMAGE_TAG }} .
 
-      - name: Upload the image to docker Hub
+      - name: Push the image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/test-image:${{ env.IMAGE_TAG }}
 
-      - name: config ssh
-        uses: webfactory/ssh-agent@v0.5.4
+      - name: Docker-Compose Remote Deployment
+        uses: astappiev/docker-compose-remote-action@master
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Run test stack directly
-        run: |
-          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
-            set -e
-
-            echo "🔐 Docker login..."
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-
-            echo "🧹 Clean previous containers/volumes..."
-            docker stop test-mongo || true
-            docker rm test-mongo || true
-            docker volume rm mongo_data || true
-
-            echo "🐳 Start MongoDB with init..."
-            docker compose -f /root/mongo-tools/init/docker-compose.yaml up -d
-
-            echo "⏳ Wait for Mongo to be ready..."
-            until mongosh "mongodb://lotto:lotto@localhost:27017/Lotto?authMechanism=SCRAM-SHA-1" --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
-              echo "⏳ Mongo not ready yet..."
-              sleep 2
-            done
-            echo "✅ Running test container..."
-
-            docker run --rm \
-              --network=host \
-              -e MONGO_URI="mongodb://lotto:lotto@localhost:27017/Lotto?authSource=admin" \
-              ${{ secrets.DOCKER_USERNAME }}/test-image:${{ github.sha }}
-
-          EOF
-
-
-
+          ssh_host: ${{ secrets.DROPLET_IP }}
+          ssh_user: root
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_host_public_key: ${{ secrets.SSH_HOST_PUBLIC_KEY }}
+          docker_compose_prefix: myapp
+          docker_compose_filename: docker-compose.yml
