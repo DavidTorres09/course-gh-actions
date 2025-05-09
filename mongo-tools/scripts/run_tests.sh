@@ -43,7 +43,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "🗓️Changing dates in the database before running mobile tests..."
-./mongo-tools/scripts/mongo_update_dates.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
+./mongo-tools/scripts/update_dates.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
 if [ $? -ne 0 ]; then
   echo "❌ Update dates failed before mobile tests. Aborting."
   exit 1
