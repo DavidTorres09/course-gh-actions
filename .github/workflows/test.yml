@@ -37,8 +37,9 @@ jobs:
 
       - name: Deploy and run tests
         run: |
+          IMAGE_TAG=${{ github.sha }}
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
-            set -e  # Detiene el script si algo falla
+            set -e  
 
             IMAGE_TAG=${{ github.sha }}
 
@@ -66,7 +67,7 @@ jobs:
               mongo:6.0
 
             echo "⏳ Waiting 5s for Mongo to initialize..."
-            sleep 5  # Opcional si tu imagen de pruebas espera activamente
+            sleep 5  
 
             echo "🚀 Starting test container..."
             docker run --name test-container \
