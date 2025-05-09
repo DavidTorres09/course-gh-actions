@@ -15,13 +15,6 @@ TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 DESKTOP_REPORT_DIR="$REPORT_DIR/desktop-report-$TIMESTAMP"
 MOBILE_REPORT_DIR="$REPORT_DIR/mobile-report-$TIMESTAMP"
 
-echo "⏳ Waiting for MongoDB to be ready..."
-until mongosh "$MONGO_URI" --eval 'db.runCommand({ ping: 1 })' >/dev/null 2>&1; do
-  echo "⏳ Mongo not ready yet. Retrying in 2s..."
-  sleep 2
-done
-echo "✅ Mongo is ready!"
-
 echo "🔁 Restoring database before running desktop tests..."
 ./mongo-tools/scripts/restore.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
 if [ $? -ne 0 ]; then

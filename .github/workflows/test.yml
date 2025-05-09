@@ -66,6 +66,12 @@ jobs:
             -e MONGO_INITDB_ROOT_PASSWORD=lotto \
             mongo:6.0
 
+            echo "⏳ Waiting for MongoDB to be ready..."
+            until mongosh "mongodb://lotto:lotto@localhost:27017/admin?authMechanism=SCRAM-SHA-1" --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
+              echo "⏳ Mongo not ready yet. Retrying in 2s..."
+              sleep 2
+            done
+            echo "✅ Mongo is ready!"
 
             echo "🚀 Starting test container..."
             docker run -d \
