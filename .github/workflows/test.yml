@@ -35,64 +35,40 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Generate docker-compose file with dynamic image tag
+      - name: Run test stack directly
         run: |
-          cat > mongoDB.Compose.yaml <<EOF
-      version: '3.8'
-
-      services:
-        mongo:
-          image: mongo:6.0
-          ports:
-            - "27018:27017"
-          environment:
-            MONGO_INITDB_ROOT_USERNAME: lotto
-            MONGO_INITDB_ROOT_PASSWORD: lotto
-            MONGO_INITDB_DATABASE: Lotto
-          volumes:
-            - mongo-test-data:/data/db
-            - ./mongo-tools/init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-
-        test-runner:
-          image: ${DOCKER_USERNAME}/test-image:${GITHUB_SHA}
-          container_name: test-runner
-          environment:
-            MONGO_URI: mongodb://lotto:lotto@mongo:27017/Lotto?authSource=admin
-          depends_on:
-            - mongo
-
-      volumes:
-        mongo-test-data:
-      EOF
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          GITHUB_SHA: ${{ github.sha }}
-
-
-      - name: Copy docker-compose file to server
-        run: |
-          scp -o StrictHostKeyChecking=no mongoDB.Compose.yaml root@${{ secrets.DROPLET_IP }}:/root/test-suite/
-
-
-      - name: Deploy the droplet
-        run: |
-          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << EOF
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
             set -e
 
-            echo "🔐 Logging in to Docker Hub..."
+            echo "🔐 Docker login..."
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-            echo "📦 Pulling latest test image (if needed)..."
-            docker pull ${{ secrets.DOCKER_USERNAME }}/test-image:${{ github.sha }} || true
+            echo "🧹 Clean previous containers/volumes..."
+            docker stop test-mongo || true
+            docker rm test-mongo || true
+            docker volume rm mongo_data || true
 
-            echo "🧹 Cleaning up previous stack..."
-            docker compose -f /root/test-suite/mongoDB.Compose.yaml down -v || true
+            echo "🐳 Start MongoDB with init..."
+            docker run -d \
+              --name test-mongo \
+              -p 27018:27017 \
+              -v mongo_data:/data/db \
+              -v /root/test-suite/mongo-tools/init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro \
+              -e MONGO_INITDB_ROOT_USERNAME=lotto \
+              -e MONGO_INITDB_ROOT_PASSWORD=lotto \
+              mongo:6.0
 
-            echo "🚀 Starting test stack (Mongo + Runner)..."
-            docker compose -f /root/test-suite/mongoDB.Compose.yaml up --abort-on-container-exit
+            echo "⏳ Wait for Mongo to be ready..."
+            until mongosh "mongodb://lotto:lotto@localhost:27017/admin?authMechanism=SCRAM-SHA-1" --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1; do
+              echo "⏳ Mongo not ready yet..."
+              sleep 2
+            done
 
-            echo "📋 Showing logs:"
-            docker compose -f /root/test-suite/mongoDB.Compose.yaml logs --no-color
+            echo "✅ Running test container..."
+            docker run --rm \
+              --network=host \
+              -e MONGO_URI="mongodb://lotto:lotto@localhost:27017/Lotto?authSource=admin" \
+              ${{ secrets.DOCKER_USERNAME }}/test-image:${{ github.sha }}
 
           EOF
 
