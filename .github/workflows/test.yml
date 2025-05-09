@@ -32,7 +32,7 @@ jobs:
 
       - name: Copy project to droplet
         run: |
-          scp -r . root@${{ secrets.DROPLET_IP }}:/root/project
+          scp -o StrictHostKeyChecking=no -r . root@${{ secrets.DROPLET_IP }}:/root/project
 
       - name: Build and run docker-compose on droplet
         run: |
