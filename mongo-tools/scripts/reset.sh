@@ -2,12 +2,6 @@
 
 # ⚠️ Safety check: ensure we're only touching the test environment
 echo "⚠️  This will reset the TEST MongoDB container and volume."
-read -p "Are you sure you want to continue? (y/N): " confirm
-
-if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-  echo "Aborted."
-  exit 1
-fi
 
 # Remove test container if it exists
 docker rm -f mongo-test-container 2>/dev/null || echo "Container mongo-test-container not found"
