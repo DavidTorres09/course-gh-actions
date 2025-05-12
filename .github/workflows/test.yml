@@ -45,6 +45,6 @@ jobs:
             cd /root/project
             chmod +x ./mongo-tools/scripts/reset.sh
             chmod +x ./mongo-tools/scripts/run_tests.sh
-            bash reset.sh
-            bash run_tests.sh
+            bash ./mongo-tools/scripts/reset.sh
+            bash ./mongo-tools/scripts/run_tests.sh
           EOF
