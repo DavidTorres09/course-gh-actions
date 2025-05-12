@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # For now, we can't use inputs, for security
-MONGO_URI="mongodb://lotto:lotto@mongo:27017/Lotto?authMechanism=SCRAM-SHA-1"
+MONGO_URI="mongodb://lotto:lotto@localhost:27017/Lotto?authMechanism=SCRAM-SHA-1"
 
 mongosh "$MONGO_URI" --eval '
 db.getCollection("Tickets").updateMany(

@@ -43,6 +43,8 @@ jobs:
         run: |
           ssh root@${{ secrets.DROPLET_IP }} << 'EOF'
             cd /root/project
-            docker compose down -v || true
-            docker compose up -d --build
+            chmod +x ./mongo-tools/scripts/reset.sh
+            chmod +x ./mongo-tools/scripts/run_tests.sh
+            bash reset.sh
+            bash run_tests.sh
           EOF
