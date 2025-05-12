@@ -9,21 +9,21 @@ ARCHIVE_NAME="./mongo-tools/backups/backup.archive.gz"
 
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 
-REPORT_DIR="./reports"
-mkdir -p "$BACKUP_DIR"
+#REPORT_DIR="./reports"
+#mkdir -p "$BACKUP_DIR"
 
 DESKTOP_REPORT_DIR="$REPORT_DIR/desktop-report-$TIMESTAMP"
 MOBILE_REPORT_DIR="$REPORT_DIR/mobile-report-$TIMESTAMP"
 
 echo "🔁 Restoring database before running desktop tests..."
-./restore.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
+./mongo-tools/scripts/restore.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
 if [ $? -ne 0 ]; then
   echo "❌ Restore failed before desktop tests. Aborting."
   exit 1
 fi
 
 echo "🗓️Changing dates in the database before running desktop tests..."
-./update_dates.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
+./mongo-tools/scripts/update_dates.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
 if [ $? -ne 0 ]; then
   echo "❌ Update dates failed before desktop tests. Aborting."
   exit 1
@@ -36,14 +36,14 @@ echo "🖥️ Running desktop Playwright tests..."
 #fi
 
 echo "🔁 Restoring database again before running mobile tests..."
-./restore.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
+./mongo-tools/scripts/restore.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
 if [ $? -ne 0 ]; then
   echo "❌ Restore failed before mobile tests. Aborting."
   exit 1
 fi
 
 echo "🗓️Changing dates in the database before running mobile tests..."
-./update_dates.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
+./mongo-tools/scripts/update_dates.sh -t "$MONGO_URI" -d "$DB_NAME" -i "$ARCHIVE_NAME"
 if [ $? -ne 0 ]; then
   echo "❌ Update dates failed before mobile tests. Aborting."
   exit 1
