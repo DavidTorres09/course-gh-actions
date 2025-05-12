@@ -1,19 +1,18 @@
 FROM mcr.microsoft.com/playwright:v1.42.1-jammy
 
-# Update the package list to ensure access to the latest versions
 RUN apt-get update && \
-    # Install essential tools for adding new repositories and handling certificates
+    # Install tools for adding new repositories and handling certificates
     apt-get install -y gnupg curl ca-certificates && \
-    # Download and store MongoDB's GPG key to verify package authenticity
+    # Download and store MongoDB GPG key to verify package authenticity
     curl -fsSL https://pgp.mongodb.com/server-6.0.asc | \
     gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg && \
-    # Add MongoDB's official repository to the system's package sources
+    # Add MongoDB official repository to the system package sources
     echo "deb [ arch=amd64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] \
     https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > \
     /etc/apt/sources.list.d/mongodb-org-6.0.list && \
-    # Update the package list again to include MongoDB's repository
+    # Update the package list again to include MongoDB repository
     apt-get update && \
-    # Install MongoDB Shell (mongosh) and database tools like mongodump and mongorestore
+    # Install mongosh and database tools like mongodump and mongorestore
     apt-get install -y mongodb-mongosh mongodb-org-tools && \
     # Clean up the package lists to reduce image size
     rm -rf /var/lib/apt/lists/*

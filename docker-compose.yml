@@ -20,19 +20,5 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-
-  test-runner:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      mongo:
-        condition: service_healthy
-    environment:
-      MONGO_URL: mongodb://lotto:lotto@mongo:27017/Lotto?authMechanism=SCRAM-SHA-1
-    volumes:
-      - ./mongo-tools:/app/mongo-tools
-    command: bash ./mongo-tools/scripts/run_tests.sh
-
 volumes:
   mongo-test-data:
