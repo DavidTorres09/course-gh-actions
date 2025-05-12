@@ -41,10 +41,24 @@ jobs:
 
       - name: Build and run docker-compose on droplet
         run: |
-          ssh root@${{ secrets.DROPLET_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            set -e
+
+            echo "📁 Navigating to project directory..."
             cd /root/project
+
+            echo "🔐 Setting permissions..."
+            chmod +x ./mongo-tools/scripts/install-mongo-tools.sh
             chmod +x ./mongo-tools/scripts/reset.sh
             chmod +x ./mongo-tools/scripts/run_tests.sh
+
+            echo "📦 Installing MongoDB tools..."
+            bash ./mongo-tools/scripts/install-mongo-tools.sh
+
+            echo "🧹 Resetting database..."
             bash ./mongo-tools/scripts/reset.sh
+
+            echo "🧪 Running tests..."
             bash ./mongo-tools/scripts/run_tests.sh
           EOF
+
