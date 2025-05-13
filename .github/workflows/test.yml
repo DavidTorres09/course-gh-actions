@@ -39,15 +39,10 @@ jobs:
         run: |
           scp -o StrictHostKeyChecking=no -r . root@${{ secrets.DROPLET_IP }}:/root/project
 
-      - name: 📁 Navigate to project directory
-        run: |
-          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
-            cd /root/project
-          EOF
-
       - name: 🔐 Set execution permissions on scripts
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd /root/project
             chmod +x /root/project/mongo-tools/scripts/install-mongo-tools.sh
             chmod +x /root/project/mongo-tools/scripts/reset.sh
             chmod +x /root/project/mongo-tools/scripts/run_tests.sh
