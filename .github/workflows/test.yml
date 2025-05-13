@@ -79,7 +79,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
             cd /root/project
-            #npx playwright test tests/LondonPlayers/desktop/history --reporter=list
+            npx playwright test tests/google.spec.ts --reporter=list
           EOF
 
       - name: 🔁 Restore DB before mobile tests
@@ -100,7 +100,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
             cd /root/project
-            #npx playwright test tests/LondonPlayers/desktop/history --reporter=list
+            npx playwright test tests/google.spec.ts --reporter=list
           EOF
 
 

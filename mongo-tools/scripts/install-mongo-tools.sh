@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 set -e
 
 KEYRING_PATH="/usr/share/keyrings/mongodb-server-6.0.gpg"
@@ -17,6 +16,12 @@ echo "${MONGO_REPO}" > "${REPO_LIST}"
 apt-get update && \
 apt-get install -y mongodb-mongosh mongodb-org-tools
 
-# Limpiar la caché de paquetes
+curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+apt-get install -y nodejs
+
+npm init -y
+npm install --save-dev @playwright/test
+npx playwright install --with-deps
+
 rm -rf /var/lib/apt/lists/*
 
