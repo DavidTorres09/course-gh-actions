@@ -15,7 +15,7 @@ jobs:
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
-      - name: Clone the repository
+      - name: 💾 Clone the repository
         uses: actions/checkout@v3
 
       #- name: Login to Docker Hub
@@ -30,12 +30,12 @@ jobs:
       #- name: Push the image to Docker Hub
         #  run: docker push ${{ secrets.DOCKER_USERNAME }}/test-image:${{ env.IMAGE_TAG }}
 
-      - name: Add SSH key
+      - name: 🔏 Add SSH key
         uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Copy project to droplet
+      - name: 📝 Copy project to droplet
         run: |
           scp -o StrictHostKeyChecking=no -r . root@${{ secrets.DROPLET_IP }}:/root/project
 
@@ -62,12 +62,14 @@ jobs:
       - name: 🧹 Reset test MongoDB container and volume
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd /root/project
             /root/project/mongo-tools/scripts/reset.sh
           EOF
 
       - name: 🧪 Run Playwright tests
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd /root/project
             /root/project/mongo-tools/scripts/run_tests.sh
           EOF
 
