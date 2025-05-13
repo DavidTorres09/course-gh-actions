@@ -39,26 +39,35 @@ jobs:
         run: |
           scp -o StrictHostKeyChecking=no -r . root@${{ secrets.DROPLET_IP }}:/root/project
 
-      - name: Build and run docker-compose on droplet
+      - name: 📁 Navigate to project directory
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
-            set -e
-
-            echo "📁 Navigating to project directory..."
             cd /root/project
+          EOF
 
-            echo "🔐 Setting permissions..."
-            chmod +x ./mongo-tools/scripts/install-mongo-tools.sh
-            chmod +x ./mongo-tools/scripts/reset.sh
-            chmod +x ./mongo-tools/scripts/run_tests.sh
+      - name: 🔐 Set execution permissions on scripts
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            chmod +x /root/project/mongo-tools/scripts/install-mongo-tools.sh
+            chmod +x /root/project/mongo-tools/scripts/reset.sh
+            chmod +x /root/project/mongo-tools/scripts/run_tests.sh
+          EOF
 
-            echo "📦 Installing MongoDB tools..."
-            bash ./mongo-tools/scripts/install-mongo-tools.sh
+      - name: 📦 Install MongoDB CLI tools
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            /root/project/mongo-tools/scripts/install-mongo-tools.sh
+          EOF
 
-            echo "🧹 Resetting database..."
-            bash ./mongo-tools/scripts/reset.sh
+      - name: 🧹 Reset test MongoDB container and volume
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            /root/project/mongo-tools/scripts/reset.sh
+          EOF
 
-            echo "🧪 Running tests..."
-            bash ./mongo-tools/scripts/run_tests.sh
+      - name: 🧪 Run Playwright tests
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            /root/project/mongo-tools/scripts/run_tests.sh
           EOF
 
