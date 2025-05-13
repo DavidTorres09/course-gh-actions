@@ -61,10 +61,46 @@ jobs:
             /root/project/mongo-tools/scripts/reset.sh
           EOF
 
-      - name: 🧪 Run Playwright tests
+      - name: 🔁 Restore DB before desktop tests
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
             cd /root/project
-            /root/project/mongo-tools/scripts/run_tests.sh
+            /root/project/mongo-tools/scripts/restore.sh -t "mongodb://lotto:lotto@localhost:27017/Lotto?authMechanism=SCRAM-SHA-1" -d "Lotto" -i "/root/project/mongo-tools/backups/backup.archive.gz"
           EOF
+
+      - name: 🗓️ Update dates before desktop tests
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd /root/project
+            /root/project/mongo-tools/scripts/update_dates.sh -t "mongodb://lotto:lotto@localhost:27017/Lotto?authMechanism=SCRAM-SHA-1" -d "Lotto" -i "/root/project/mongo-tools/backups/backup.archive.gz"
+          EOF
+
+      - name: 🖥️ Run desktop Playwright tests
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd /root/project
+            #npx playwright test tests/LondonPlayers/desktop/history --reporter=list
+          EOF
+
+      - name: 🔁 Restore DB before mobile tests
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd /root/project
+            /root/project/mongo-tools/scripts/restore.sh -t "mongodb://lotto:lotto@localhost:27017/Lotto?authMechanism=SCRAM-SHA-1" -d "Lotto" -i "/root/project/mongo-tools/backups/backup.archive.gz"
+          EOF
+
+      - name: 🗓️ Update dates before mobile tests
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd /root/project
+            /root/project/mongo-tools/scripts/update_dates.sh -t "mongodb://lotto:lotto@localhost:27017/Lotto?authMechanism=SCRAM-SHA-1" -d "Lotto" -i "/root/project/mongo-tools/backups/backup.archive.gz"
+          EOF
+
+      - name: 🖥️ Run mobile Playwright tests
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd /root/project
+            #npx playwright test tests/LondonPlayers/desktop/history --reporter=list
+          EOF
+
 
